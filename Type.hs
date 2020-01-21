@@ -1,4 +1,5 @@
 -- This file has not been updated to GradualTypeInference version 2
+-- Does it need to be?
 module Type(
     Type(Var, Atomic, Fun, Dynamic),
     intersect,
