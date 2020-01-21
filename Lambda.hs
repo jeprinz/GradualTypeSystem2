@@ -8,10 +8,10 @@ import Type
 import NameGiver
 import Control.Monad.State
 
-data Exp = Var Id | App Exp Exp | Lam Id Exp | LAtomic Type | Let Id Exp Exp deriving(Show)
+data Exp = Var Id | App Exp Exp | Lam Id Exp | LAtomic Type String | Let Id Exp Exp deriving(Show)
 
 data AExp =
-    AVar Type Id | AApp Type AExp AExp | ALam Type Id AExp | ALAtomic Type deriving(Show)
+    AVar Type Id | AApp Type AExp AExp | ALam Type Id AExp | ALAtomic Type String | ALet Type Id Exp Exp deriving(Show)
 
 type TypeState' = TypeState Id Char
 
@@ -26,6 +26,10 @@ aExpToStringI (ALam t x e) = do
     varName <- getName x
     ts <- typeToStringI t False
     return ("l " ++ [varName] ++ ". " ++ es ++ " : " ++ ts)
+aExpToStringI (AVar t x) = do
+    varName <- getName x
+    return [varName]
+-- aExpToStringI (ALAtomic )
 
 
 aExpToString :: AExp -> String

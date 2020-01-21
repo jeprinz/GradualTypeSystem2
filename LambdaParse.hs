@@ -22,7 +22,7 @@ import Type
 -- https://wiki.haskell.org/Parsing_a_simple_imperative_language
 
 data MedExp = MedApp MedExp MedExp | MedLambda String MedExp |
-  MedVar String | MedAtomic Type | MedLet String MedExp MedExp deriving(Show)
+  MedVar String | MedAtomic Type String | MedLet String MedExp MedExp deriving(Show)
 
 --The following is a list of built in constants
 constants :: [(Type, String)]
@@ -95,7 +95,7 @@ letExp = do reserved "let"
 
 makeBuiltinExp :: Type -> String -> Parser MedExp
 makeBuiltinExp t name = do reserved name
-                           return $ MedAtomic t
+                           return $ MedAtomic t name
 
 builtinExps = List.foldr1 (<|>) $ List.map (\(t, s) -> makeBuiltinExp t s) constants
 
@@ -123,7 +123,7 @@ varsConvertI (MedApp me1 me2) = do e1 <- varsConvertI me1
 varsConvertI (MedLambda v me) = do id <- getName v
                                    e <- varsConvertI me
                                    return (Lam id e)
-varsConvertI (MedAtomic s) = return $ LAtomic s
+varsConvertI (MedAtomic t s) = return $ LAtomic t s
 varsConvertI (MedLet x e1 e2) = do id <- getName x
                                    e1 <- varsConvertI e1
                                    e2 <- varsConvertI e2
