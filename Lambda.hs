@@ -1,12 +1,15 @@
 module Lambda(
     Exp (Var, App, Lam, LAtomic, Let),
     AExp' (AVar, AApp, ALam, ALAtomic, ALet),
-    AExp
+    AExp,
+    applySubsAexp
 ) where
 
-import Data.Map as Map
 import Id
+import Data.Map as Map
 import Type
+
+
 import NameGiver
 import Control.Monad.State
 
@@ -57,3 +60,15 @@ aExpToStringI (t, aexp) = do
 
 aExpToString :: AExp -> String
 aExpToString aexp = evalState (aExpToStringI aexp) (['A'..'Z'], Map.empty)
+
+applySubsAexp :: Substitutions -> AExp -> AExp
+applySubsAexp subs (t, aExp) =
+    let t' = applySubs subs t
+        aExp' = case aExp of
+                      AVar x -> AVar x
+                      AApp e1 e2 -> AApp (applySubsAexp subs e1) (applySubsAexp subs e2)
+                      ALam x e -> ALam x (applySubsAexp subs e)
+                      ALAtomic s -> ALAtomic s
+                      ALet t x a1 a2 -> ALet (applySubs subs t) x (applySubsAexp subs a1) (applySubsAexp subs a2)
+    in (t', aExp')
+
