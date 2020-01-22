@@ -1,5 +1,7 @@
 module Lambda(
-    Exp (Var, App, Lam, LAtomic, Let)
+    Exp (Var, App, Lam, LAtomic, Let),
+    AExp' (AVar, AApp, ALam, ALAtomic, ALet),
+    AExp
 ) where
 
 import Data.Map as Map

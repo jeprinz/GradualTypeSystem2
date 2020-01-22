@@ -107,7 +107,7 @@ appExp = do e1 <- expression
 parseMed :: String -> MedExp
 parseMed str =
   case Text.ParserCombinators.Parsec.parse whileParser "" str of
-    Left e  -> error $ show e
+    Left e  ->  $ show e
     Right r -> r
 
 

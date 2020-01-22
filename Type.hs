@@ -17,7 +17,6 @@ import Data.Set as Set
 import Data.Map as Map
 import Control.Monad.State
 import NameGiver
-import Debug.Trace -- delete later
 import Id
 
 data Type = Var Id | Atomic String | Fun Type Type | Dynamic deriving (Show, Eq, Ord)
