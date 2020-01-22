@@ -1,0 +1,38 @@
+let f = l x . x in l p . p (f 0) (f true)
+
+l x . let y = x in plus y y
+
+
+THIS IS THE IMPORTANT ONE:
+(l x . let y = x in plus y y) true
+
+This typechecks. What should instead happen is that when the let expression is checked,
+it adds every type of y that is used to the list of types for free var x, aka [num, num]
+then when the lambda is checked it should calculate that the lambda expression has type num -> num
+and then give conflicting types when applied to true.
+
+Possible solution: consolidate the concepts of Substititions and FreeVars, so that
+every variable has an associated type variable which gets a list of types
+
+I fixed the above by applying subs to freevars in let. Instead, consider:
+l x . let y = x in l p . p (y 0) (y true)
+
+the final type is (bool->A)->(B->A->C)->C
+which ignores the (y 0). This is because the last substition takes effect? or the first?
+
+I THINK HERE IS WHAT I NEED TO DO:
+I need the FreeVars that is returned from infer to have a list of substititions for each type variable,
+and for those to be unioned together when the corresponding variable is bound by a lambda?
+ALTERNATE: in infer let, take list of subs and union them together, in other words, every time that the
+same variable appears in a sub, union those together?
+
+THINK ABOUT LATER: fundamentally, the problem is that when let x = e1 in e2 is inferred, it makes sense
+as long as type variables in e1 are never further clarified. The problem is when they are, the algorithm
+makes no sense. infer e1 is intersected separately with each x in e2. But when (infer e1) is further
+clarified, that clarification needs to separately be applied to each intersection.
+
+ANOTHER IDEA:
+in let x = e1 in e2, the case where things go wrong is when there are free variables in e1.
+Each of these free variables needs to get an entire list of possibile types based on ALL of
+the ways that they are used.
+YES! REMEMBER: the list of types in the free vars represents all of the ways that the variables are USED

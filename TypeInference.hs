@@ -57,28 +57,32 @@ inferI (App e1 e2) =
      let ae1' = applySubsAexp subs ae1
      let ae2' = applySubsAexp subs ae2
 
-     return ((tau', AApp ae1 ae2), free')
+     return ((tau', AApp ae1' ae2'), free')
 inferI (LAtomic t text) = return ((t, ALAtomic text), Map.empty)
 inferI (Let x e1 e2) =
-  do  (ae1, free1) <- inferI e1
+  do  (ae1, free1) <- inferI e1 -- should get one copy for each x in ae2
       (ae2, free2) <- inferI e2
       let te1 = fst ae1
-      let free = combineFreeVars free1 free2
-      let subs = case Map.lookup x free2 of
+      let (subs, free1s) = case Map.lookup x free2 of -- ... for each one of these, which should all be combined!
                    Just ts -> let onEach t = do (_, subs) <- Type.intersect te1 t
                                                 return subs
                                   mSubsList = Prelude.map onEach ts :: [Maybe Substitutions]
                                   subsList = Prelude.map (\ms -> case ms of
                                                                    Just subs -> subs
-                                                                   Nothing -> []) mSubsList
+                                                                   Nothing -> []) mSubsList :: [Substitutions]
+                                  freeVarsList = Prelude.map (applySubsToFree free1) subsList :: [FreeVars]
+                                  combinedFree = foldr1 combineFreeVars freeVarsList :: FreeVars
                                   subs = foldr1 (++) subsList -- if this line crashes, it means that the FreeVars map broke the rule of no empty lists
-                              in  subs :: Substitutions
-                   Nothing -> []
+                              in  (subs, combinedFree) :: (Substitutions, FreeVars)
+                   Nothing -> ([], Map.empty)
+      let free = combineFreeVars free1s free2
       let free' = delete x free
-      let ae1' = applySubsAexp subs ae1
       let ae2' = applySubsAexp subs ae2
+      let tx = fst ae1
       let t = fst ae2'
-      return ((t, ALet t x ae1' ae2'), free')
+      --trying this new line
+      let free'' = applySubsToFree free' subs
+      return ((t, ALet tx x ae1 ae2'), free'')
 
 combineList :: [Type] -> (Type, Substitutions)
 combineList [] = error "the list shouldn't have been empty"

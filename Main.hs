@@ -23,7 +23,7 @@ takeLine = do putStr ">> "
                 Just ((t, aexp), free) ->
                   do let (lIds, types) = unzip (toList free)
                     --  let (asString : freeVarTypes) = typesToStrings (t : types)
-                     let asString = typeToString t
+                     let asString = aExpToString (t, aexp)
                      putStrLn asString
                     --  putStrLn (freeVarInfo lIds varNames freeVarTypes)
                 Nothing -> putStrLn "Conflicting types"

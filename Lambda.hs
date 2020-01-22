@@ -2,7 +2,8 @@ module Lambda(
     Exp (Var, App, Lam, LAtomic, Let),
     AExp' (AVar, AApp, ALam, ALAtomic, ALet),
     AExp,
-    applySubsAexp
+    applySubsAexp,
+    aExpToString
 ) where
 
 import Id
@@ -59,7 +60,8 @@ aExpToStringI (t, aexp) = do
     
 
 aExpToString :: AExp -> String
-aExpToString aexp = evalState (aExpToStringI aexp) (['A'..'Z'], Map.empty)
+aExpToString aexp = evalState (aExpToStringI aexp) (['a'..'z'], Map.empty)
+-- TODO: why do variables and types sometimes have the same letter?
 
 applySubsAexp :: Substitutions -> AExp -> AExp
 applySubsAexp subs (t, aExp) =
